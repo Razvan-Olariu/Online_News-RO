@@ -6,76 +6,132 @@
 # Contact: ufcolonel@gmail.com
 
 
-#import Scraper 
-#import Crawler
+import Crawler,Scraper
+from datetime import datetime
 from tkinter import *
 from tkinter import ttk
 
 
-#   Graphical User Interface initialization
+
+def save_status():
+    global alegeri
+    global interest
+    alegeri = [option1.get(),option2.get(),option3.get(),
+               option4.get(),option5.get(),option6.get(),
+               option7.get(),option8.get(),option9.get()]
+    interest = [search.get()]
+    
+def check():
+    for source in range(len(alegeri)):
+        https = alegeri[source]
+        if https.startswith("https://"):
+            try:
+                https = Crawler.crawl(https,interest)
+            except Exception as error:
+                with open("Reports.txt","w") as f:
+                    f.write(str(error))
+            finally:
+                interest = Scraper.scrape(https)
+
+
+def save():
+    alegeri = [option1.get(),option2.get(),option3.get(),
+               option4.get(),option5.get(),option6.get(),
+               option7.get(),option8.get(),option9.get()]
+    for source in range(len(alegeri)):
+        if alegeri[source].startswith("https://"):
+            header = f"Date din sursa {alegeri[source]} :\n"
+            with open("Salvate.txt","a") as g:
+                g.write(datetime.now().strftime("\t%d/%m/%Y <---> %H:%M:%S\n"))
+                g.write(header)
+                g.write(interest)
+
+            
+
+# Graphical User Interface initialization - FINISHED
 app = Tk()
-screen_width = app.winfo_screenwidth()  # Lungime pentru rezolutia display
-screen_height = app.winfo_screenheight()# Latime pentru rezolutie display
 app.title('Ziare online de Olariu Alexandru-Razvan')
-app.maxsize(screen_width,screen_height)
+app.geometry('900x500')
+app.resizable(False,False)
 
 
-#   Top-down Menu setup
-#   TODO: Prelungire comenzi
-menu = Menu(app)
-app.config(menu=menu)
-helpmenu = Menu(menu)
-menu.add_cascade(label='Ajutor', menu=helpmenu) 
-helpmenu.add_command(label='Folosire software')
-helpmenu.add_command(label='Contact') 
+# Search
+ttk.Label(app,text="Căutare după termeni:").place(x=10,y=5)
+search = ttk.Entry(app)
+search.place(x=150,y=5,width=300,height=23)
 
-#   Search function
-Label(app,text="Cautare dupa termeni:").pack()
-search = Entry(app)
-search.pack()
+# Online News Variables
+option1, option2, option3 = StringVar(), StringVar(), StringVar()
+option4, option5, option6 = StringVar(), StringVar(), StringVar() 
+option7, option8, option9 = StringVar(), StringVar(), StringVar() 
 
-#   Variables initialization
-var1 = IntVar()
-var2 = IntVar()
-var3 = IntVar()
+# Online News
+
+ttk.Checkbutton(app,text="Ziarul Libertatea",variable=option1,
+                        onvalue='https://www.libertatea.ro/',
+                        command=save_status).place(x=10,y=50)
+ttk.Checkbutton(app,text="Ziarul Financiar",variable=option2,
+                        onvalue='https://www.zf.ro/',
+                        command=save_status).place(x=10,y=100)
+ttk.Checkbutton(app,text="Mediafax",variable=option3,
+                        onvalue='https://www.mediafax.ro/',
+                        command=save_status).place(x=160,y=50)
+ttk.Checkbutton(app,text="Evenimentul Zilei",variable=option4,
+                        onvalue='https://evz.ro/',
+                        command=save_status).place(x=160,y=100)
+ttk.Checkbutton(app,text="Ziarul Adevarul",variable=option5,
+                        onvalue='https://adevarul.ro/cauta',
+                        command=save_status).place(x=310,y=50)
+ttk.Checkbutton(app,text="Jurnalul Zilei",variable=option6,
+                        onvalue='https://jurnalulnational.ro/',
+                        command=save_status).place(x=310,y=100)
+ttk.Checkbutton(app,text="Digi24",variable=option7,
+                        onvalue='https://www.digi24.ro/',
+                        command=save_status).place(x=470,y=50)
+ttk.Checkbutton(app,text="Realitatea.NET",variable=option8,
+                        onvalue='https://www.realitatea.net/',
+                        command=save_status).place(x=470,y=100)
 
 
-#   List of online newspapers
-#   TODO: Custom ziar setat de catre utilizator.
-ttk.Label(app, text = "Ziare din care vrei sa culegi informatiile:").pack()
-ttk.Checkbutton(app, text="evz.ro",variable=var1).pack()
-ttk.Checkbutton(app, text="adevarul.ro",variable=var2).pack()
-ttk.Entry(app).pack()
-ttk.Button(app,text="Verificare").pack()
-ttk.Button(app,text="Cautare").pack()
+# Buttons
+check_button = ttk.Button(app,text="Caută",command=check)
+check_button.place(x=470,y=4)
+save_button = ttk.Button(app,text="Salvare",command=save)
+save_button.place(x=570,y=4)
 
 
-####TEST:#################################
-#https = 'https://www.adevarul.ro'       #
-#search = 'elev mort curtea de arges'    #
-##########################################
+
+# Output
+output = ttk.Notebook(app)
+ziar1, ziar2, ziar3 = Text(output), Text(output), Text(output)
+ziar4, ziar5, ziar6 = Text(output), Text(output), Text(output)
+ziar7, ziar8, ziar9 = Text(output), Text(output), Text(output)  
+output.add(ziar1, text="Ziarul Libertatea")
+output.add(ziar2, text="Ziarul Financiar")
+output.add(ziar3, text="Gazeta Sporturilor")
+output.add(ziar4, text="Romania Libera")
+output.add(ziar5, text="Ziarul Adevarul")
+output.add(ziar6, text="Jurnalul Zilei")
+output.add(ziar7, text="Digi24")
+output.add(ziar8, text="Realitatea.NET")
+output.add(ziar9, text="Ajutor")
+output.place(x=0,y=140,width=710,height=360)
 
 
-#   TODO: Output Box la ziare.
-ttk.Label(app, text = "REZULTAT:").pack(pady=25)
-address = Text(app)
-address.pack()
-#   Buton de Iesire din soft:
-#   TODO: Buton sa distruga program.
-Button(app, text='Iesire', command=app.quit, activebackground="red").pack()
+# Progress TODO
+progress_bar = ttk.Progressbar(app,orient=HORIZONTAL,length=185,mode='determinate')
+progress_bar.place(x=711,y=477)
+
+# ADS
+
+ad1_image = PhotoImage(file="ad1.png")
+ad1 = Label(app,image=ad1_image)
+ad1.place(x=707,y=0)
+ttk.Label(app,text="Reclama TA, AICI!").place(x=765,y=231)
+ad2_image = PhotoImage(file="ad2.png")
+ad2 = Label(app,image=ad2_image)
+ad2.place(x=707,y=247)
+
+
+
 app.mainloop()
-
-
-
-
-
-
-
-#   Web crawler call:
-#new_https = Crawler.crawl(f'{https}', f'{search}')
-#print(new_https)
-
-#   Web scraper call:
-#results = Scraper.scraper('https://www.factual.ro/')
-#content = Scraper.scraper(f'{new_https}')
-#print(content)

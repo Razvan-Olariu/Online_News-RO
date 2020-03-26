@@ -22,32 +22,96 @@ def listToString(list):
     return str1
 
 
-def scraper(new_https):
+def scrape(new_https):
+
     #   URL REQUEST
     url = requests.get(f'{new_https}', timeout=30)
     rezultat = ''
+    interest = []
 
     #   Fetch the website data
     soup = BeautifulSoup(url.content, features = "html.parser", from_encoding = "UTF-8")
     soup.prettify()
+
     #   Scrape the website data
-    #cautare = soup.find("article").text.replace("\t", "").replace("\r", "").replace("\n", "")
-    check = soup.find('a')['href']
-    #check = ''
-    if check.count('adevarul.ro/') >= 1:
-        title = soup.find('h2', {'class':'articleOpening'}).text.replace('\t','\n\t')
+    if new_https.startswith('https://www.libertatea.ro'):
+        title = soup.find('h1').text.replace('\t','\n\t')
+        content = soup.find_all('p')
+        for paragraph in content:
+            format = paragraph.text.replace('\n','\n\t\n')
+            interest.append(format)
+            interest.append("\n\t")
+        rezultat = listToString(title) + listToString(interest[:-2])
+        interest.clear()
+
+    elif new_https.startswith('https://www.digi24.ro'):
+        title = soup.find('h1').text
+        content = soup.find_all('p')
+        for paragraph in content:
+            format = paragraph.text
+            interest.append("\n\n")
+            interest.append(format)
+        rezultat = listToString(title) + listToString(interest[:-1])
+        interest.clear()
+
+    elif new_https.startswith('https://www.realitatea.net'):
+        title = soup.find('h2', {'class':'my-2'}).text
+        content = soup.find_all('p')
+        for paragraph in content:
+            format = paragraph.text
+            interest.append("\n\n")
+            interest.append(format)
+        rezultat = listToString(title) + listToString(interest[2:-14])
+        interest.clear()
+
+    elif new_https.startswith('https://adevarul.ro'):
+        title = soup.find('h1').text.replace('\n',' ')
+        header = soup.find('h2', {'class':'articleOpening'}).text.replace('\n',' ')
         content = soup.find('div', {'id':'article-body'}).text.replace('\t','\n\t')
-        rezultat = listToString(title) + listToString(content)
-    if check.count('evz.ro/') >= 1: # TODO.
-        title = soup.find('h2', {'class':'articleOpening'}).text.replace('\t','\n\t')
-        content = soup.find('div', {'class':'post-content'}).text.replace('\t','\n\t')
-        rezultat = listToString(title) + listToString(content)
+        rezultat = listToString(title) + '\n\n\n' + listToString(header) + listToString(content)
+
+    elif new_https.startswith('https://jurnalulnational.ro'):
+        title = soup.find('h1', {'class':'single-post-title'}).text.replace('\t','\n\t')
+        content = soup.find_all('p')
+        for paragraph in content:
+            format = paragraph.text
+            interest.append("\n\n")
+            interest.append(format)
+        rezultat = listToString(title) + listToString(interest[2:-91])
+        interest.clear()
+        
+    elif new_https.startswith('https://www.zf.ro'):
+        title = soup.find('h1', {'class':'articleTitle h1'}).text.replace('\n','\n\t')
+        content = soup.find_all('p')
+        for paragraph in content:
+            format = paragraph.text
+            interest.append("\n\n")
+            interest.append(format)
+        rezultat = listToString(title) + listToString(interest[2:-23])
+        interest.clear()
+        
+    elif new_https.startswith('https://evz.ro'):
+        title = soup.find('h1', {'class':'post-title'}).text.replace('\n','\n\t')
+        content = soup.find_all('p')
+        for paragraph in content:
+            format = paragraph.text
+            interest.append("\n\n")
+            interest.append(format)
+        rezultat = listToString(title) + listToString(interest[2:-23])
+        interest.clear()
+        
+    elif new_https.startswith('https://www.mediafax.ro'):
+        title = soup.find('h1').text.replace('\n','\n\t')
+        content = soup.find_all('p')
+        for paragraph in content:
+            format = paragraph.text
+            interest.append("\n\n")
+            interest.append(format)
+        rezultat = listToString(title) + listToString(interest[:-30])
+        interest.clear()
 
     print(rezultat)
-    #print(soup.prettify())
     return rezultat
 
 if __name__ == "__main__":
-    new_https = scraper('https://adevarul.ro/economie/stiri-economice/gigi-becali-suparat-bancile-nu-vor-sa-i-mai-tina-milioanele-euro-cont-1_5e4d089b5163ec42713b75a0/index.html') 
-    # TESTING FOR ERRORS
-    #print(soup)
+    new_https = scrape('https://www.mediafax.ro/economic/bnr-tine-cursul-stabil-moneda-europeana-ramane-in-preajma-maximului-istoric-19003665') 
